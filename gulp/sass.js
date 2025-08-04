@@ -9,5 +9,6 @@ const sass = gulpSass(dartSass);
 export default function sassTask() {
     return gulp.src(['src/styles/**/*.scss', ...EXCLUDE_PARTIALS])
                .pipe(sass())
+    // .pipe(postcss([autoprefixer]))
                .pipe(gulp.dest(`${DIST}/split-flap/styles`));
 }
