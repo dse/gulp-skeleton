@@ -1,4 +1,5 @@
 import browsersync from 'browser-sync';
+import { DIST } from './constants.js';
 
 let server;
 
