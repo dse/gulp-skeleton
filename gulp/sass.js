@@ -6,9 +6,12 @@ import { DIST, EXCLUDE_PARTIALS } from './constants.js';
 
 const sass = gulpSass(dartSass);
 
+import config from './config.cjs';
+const { sassConfig } = config;
+
 export default function sassTask() {
     return gulp.src(['src/styles/**/*.scss', ...EXCLUDE_PARTIALS])
-               .pipe(sass())
+               .pipe(sass(sassConfig))
     // .pipe(postcss([autoprefixer]))
                .pipe(gulp.dest(`${DIST}/split-flap/styles`));
 }
