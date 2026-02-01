@@ -4,6 +4,7 @@ import browserSync from "browser-sync";
 import beautify from "gulp-beautify";
 import fs from "node:fs";
 import sitemap from "gulp-sitemap";
+import glob from "glob";
 
 import nunjucks from "nunjucks-render";
 // import { nunjucksCompile as nunjucks } from "gulp-nunjucks";
@@ -16,10 +17,9 @@ import resolve from "@rollup/plugin-node-resolve";
 import babel from "@rollup/plugin-babel";
 // import webpack from "webpack";
 
-import baseSiteData from "./src/data/site-data.js";
-
 let devMode;
 let distDir;
+let siteData = getSiteData();
 
 const EXCLUDE_PARTIALS = [
     "!**/_*",
@@ -60,13 +60,21 @@ const config = {
         "path": "src/html",
     },
     sitemap: {
-        siteUrl: baseSiteData.url,
+        siteUrl: siteData.url,
     },
     data: getSiteData,
 };
 
 function getSiteData() {
-    return JSON.parse(fs.readFilesSync("src/data/site-data.json", "utf-8"));
+    const filenames = glob.sync("src/data/**/*.json");
+    filenames.sort();
+    const o = {};
+    for (const filename of filenames) {
+        const text = fs.readFileSync(filename, "utf-8");
+        const obj = JSON.parse(text);
+        Object.assign(o, obj);
+    }
+    return o;
 }
 
 let server;
