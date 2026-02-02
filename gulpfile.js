@@ -57,7 +57,7 @@ const config = {
         // ],
     },
     gulpNunjucksRender: {
-        "path": "src/html",
+        "path": "src/pages",
     },
     sitemap: {
         siteUrl: siteData.url,
@@ -134,7 +134,7 @@ function rollupTask() {
 }
 
 function sitemapTask() {
-    return gulp.src([`${distDir}/html/**/*.html`, ...EXCLUDE_TEMP])
+    return gulp.src([`${distDir}/**/*.html`, ...EXCLUDE_TEMP])
                .pipe(sitemap(config.sitemap))
                .pipe(gulp.dest(`${distDir}`));
 }
@@ -142,9 +142,9 @@ function sitemapTask() {
 function watchTask() {
     gulp.watch(["src/styles/**/*", ...EXCLUDE_TEMP],
                gulp.series(sassTask, reloadTask));
-    gulp.watch(["src/html/**/*", ...EXCLUDE_TEMP, ...EXCLUDE_PARTIALS],
+    gulp.watch(["src/pages/**/*", ...EXCLUDE_TEMP, ...EXCLUDE_PARTIALS],
                gulp.series(sassTask, reloadTask));
-    gulp.watch(["src/html/**/_*/**/*", "src/html/**/_*", ...EXCLUDE_TEMP],
+    gulp.watch(["src/pages/**/_*/**/*", "src/pages/**/_*", ...EXCLUDE_TEMP],
                gulp.series(resetHtmlLastRun, htmlTask, reloadTask));
     gulp.watch(["src/js/**/*", ...EXCLUDE_TEMP],
                gulp.series(rollupTask, reloadTask));
