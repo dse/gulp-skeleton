@@ -49,7 +49,7 @@ const config = {
     },
     sass: {
         includePaths: [
-            "node_modules",
+            "."                 // @import url("node_modules/...");
         ],
         quietDeps: true,
         // silenceDeprecations: [
@@ -65,7 +65,7 @@ const config = {
     data: getSiteData,
 };
 
-function getSiteData() {
+export function getSiteData() {
     const filenames = glob.sync("src/data/**/*.json");
     filenames.sort();
     const o = {};
@@ -79,7 +79,7 @@ function getSiteData() {
 
 let server;
 
-function serverTask(cb) {
+export function serverTask(cb) {
     if (server) {
         cb?.();
         return;
@@ -88,14 +88,14 @@ function serverTask(cb) {
     server.init(config.browserSync, cb);
 }
 
-function reloadTask(cb) {
+export function reloadTask(cb) {
     server?.reload();
     cb?.();
 }
 
 const sass = gulpSass(sassPkg);
 
-function sassTask() {
+export function sassTask() {
     return gulp.src(["src/styles/**/*.scss", ...EXCLUDE_TEMP, ...EXCLUDE_PARTIALS])
                .pipe(sass(config.sass))
                .pipe(gulp.dest(`${distDir}/css`));
@@ -103,7 +103,7 @@ function sassTask() {
 
 let resetHtmlLastRunFlag = true;
 
-function htmlTask() {
+export function htmlTask() {
     const since = resetHtmlLastRunFlag ? {} : { since: gulp.lastRun(htmlTask) };
     return gulp.src(["src/pages/**/*.njk", ...EXCLUDE_TEMP, ...EXCLUDE_PARTIALS], { ...since })
                .pipe(data(config.data))
@@ -119,7 +119,7 @@ function resetHtmlLastRun(cb) {
     cb?.();
 }
 
-function rollupTask() {
+export function rollupTask() {
     return rollup
         .rollup({ input: "src/scripts/main.js",
                   plugins: [resolve(), babel({ babelHelpers: "bundled" })] })
@@ -133,13 +133,13 @@ function rollupTask() {
         });
 }
 
-function sitemapTask() {
+export function sitemapTask() {
     return gulp.src([`${distDir}/**/*.html`, ...EXCLUDE_TEMP])
                .pipe(sitemap(config.sitemap))
                .pipe(gulp.dest(`${distDir}`));
 }
 
-function watchTask() {
+export function watchTask() {
     gulp.watch(["src/styles/**/*", ...EXCLUDE_TEMP],
                gulp.series(sassTask, reloadTask));
     gulp.watch(["src/pages/**/*", ...EXCLUDE_TEMP, ...EXCLUDE_PARTIALS],
@@ -150,32 +150,32 @@ function watchTask() {
                gulp.series(rollupTask, reloadTask));
 }
 
-function initTask(cb) {
+export function initTask(cb) {
     fs.rmSync(distDir, { recursive: true });
     fs.mkdirSync(distDir, { recursive: true });
     cb?.();
 }
 
-function copyStaticFilesTask() {
+export function copyStaticFilesTask() {
     return gulp.src(["public/**/*", ...EXCLUDE_TEMP],
                     { encoding: false })
                .pipe(gulp.dest(distDir));
 }
 
-function setDevMode(cb) {
+export function setDevModeTask(cb) {
     devMode = true;
     distDir = "_dev";
     cb?.();
 }
 
-function setProdMode(cb) {
+export function setProdModeTask(cb) {
     devMode = false;
     distDir = "dist";
     cb?.();
 }
 
-const devTask = gulp.series(
-    setDevMode,
+export const devTask = gulp.series(
+    setDevModeTask,
     initTask,
     gulp.parallel(
         rollupTask,
@@ -186,8 +186,8 @@ const devTask = gulp.series(
     watchTask,
 );
 
-const buildTask = gulp.series(
-    setProdMode,
+export const buildTask = gulp.series(
+    setProdModeTask,
     initTask,
     gulp.parallel(
         rollupTask,
@@ -203,11 +203,11 @@ const buildTask = gulp.series(
 );
 
 export {
+    // as typed on the cmdline
     devTask     as dev,
     buildTask   as build,
     sassTask    as sass,
     htmlTask    as html,
     rollupTask  as js,
     config      as config,
-    getSiteData as getSiteData, // for gulpfiles importing this
 };
